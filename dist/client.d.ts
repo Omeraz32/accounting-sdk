@@ -1,4 +1,4 @@
-import { type AccountingMessage, type SendMessageInput, type SyncTenantInput } from "./types";
+import { type AccountingFile, type AccountingMessage, type AccountingNotification, type CallRequest, type MonthStatus, type AccountingRequest, type SendMessageInput, type SyncTenantInput } from "./types";
 export interface AccountingClientOptions {
     /** Accounting Core's base URL, e.g. https://accounting-core.vercel.app */
     baseUrl: string;
@@ -32,4 +32,29 @@ export declare class AccountingClient {
         createdAt: string;
     }>;
     listMessages(externalTenantId: string): Promise<AccountingMessage[]>;
+    listRequests(externalTenantId: string): Promise<AccountingRequest[]>;
+    /** The business's own self-service "done" action for a request. */
+    fulfillRequest(requestId: string, externalTenantId: string): Promise<void>;
+    listMonthStatus(externalTenantId: string): Promise<MonthStatus[]>;
+    listCallRequests(externalTenantId: string): Promise<CallRequest[]>;
+    requestCall(externalTenantId: string, requestedById: string, proposedTimes?: string[]): Promise<{
+        id: string;
+    }>;
+    listFiles(externalTenantId: string): Promise<AccountingFile[]>;
+    /** Uploads a file on the business's behalf — `file` is whatever the
+     *  server-side route handler received (a web-standard `File`/`Blob`). */
+    uploadFile(externalTenantId: string, uploadedById: string, file: File | Blob, filename?: string): Promise<{
+        id: string;
+        filename: string;
+    }>;
+    /** Returns a readable stream of the file's bytes for the caller to pipe
+     *  into its own authenticated download response - the raw Blob URL never
+     *  needs to leave Core. */
+    downloadFile(fileId: string, externalTenantId: string): Promise<{
+        stream: ReadableStream<Uint8Array>;
+        contentType: string;
+        contentDisposition: string;
+    } | null>;
+    listNotifications(externalTenantId: string): Promise<AccountingNotification[]>;
+    markNotificationsRead(externalTenantId: string, ids: string[]): Promise<void>;
 }
